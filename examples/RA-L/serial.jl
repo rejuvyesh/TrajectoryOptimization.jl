@@ -61,7 +61,7 @@ max_violation(sload_al)
         $load_params, :sequential, $opts_al, max_iters=3)
 end
 @btime solve_admm($prob_lift, $prob_load, $quad_params,
-    $load_params, :parallel, $opts_al, max_iters=3)B
+    $load_params, :parallel, $opts_al, max_iters=3)
 
 visualize_quadrotor_lift_system(vis, [[pload_al]; plift_al])
 #=

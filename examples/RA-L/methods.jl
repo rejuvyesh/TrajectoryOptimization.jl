@@ -367,7 +367,7 @@ function trim_conditions_batch(num_lift,r0_load,quad_params,load_params,quat,opt
 
 	trim, trim_solver = solve(prob_batch_trim,opts)
 
-    scenario = :p2p
+    scenario = :doorway
     prob_batch = gen_prob(:batch, quad_params, load_params, r0_load,
         num_lift=num_lift, quat=quat, scenario=scenario)
 	#

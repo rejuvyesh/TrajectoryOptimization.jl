@@ -89,7 +89,7 @@ function visualize_batch(vis,prob,obs=true,num_lift=3)
     # settransform!(vis["/Cameras/default"], compose(Translation(5., -3, 3.),LinearMap(RotX(pi/25)*RotZ(-pi/2))))
 
     if obs
-        _cyl = door_obstacles()
+        _cyl = door_obstacles(0.1)
         addcylinders!(vis, _cyl, 2.1)
     end
     x0 = prob.x0

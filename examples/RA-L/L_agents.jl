@@ -48,7 +48,7 @@ num_lift_cache = collect(3:15)
 # vis = Visualizer()
 # open(vis)
 
-for num_lift = num_lift_cache
+for num_lift in num_lift_cache
 	@info "Initial solve $num_lift"
 	# run first
 	@time prob_lift, prob_load = trim_conditions_dist(num_lift,r0_load,quad_params,load_params,quat,opts_al);
@@ -60,8 +60,8 @@ for num_lift = num_lift_cache
 	# run fast
 	prob_lift, prob_load = trim_conditions_dist(num_lift,r0_load,quad_params,load_params,quat,opts_al);
 	t = @belapsed begin
-		wait.([@spawnat w reset_control_reference!(prob_lift[:L]) for w in workers()[1:num_lift]])
-		solve_admm(prob_lift,prob_load, quad_params,load_params,parallel, opts_al);
+		#wait.([@spawnat w reset_control_reference!(prob_lift[:L]) for w in workers()[1:num_lift]])
+		#solve_admm(prob_lift,prob_load, quad_params,load_params,parallel, opts_al);
 	end
 
 	if parallel

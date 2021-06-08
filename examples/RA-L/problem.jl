@@ -54,8 +54,8 @@ function gen_prob(agent, quad_params, load_params, r0_load=[0,0,0.25];
     u30 = [3.32272, 3.32307, 3.32178, 3.32144, 4.64966]
     uload = [4.64966, 4.64966, 4.64966]
 
-    q_lift_static = [q10, q20, q30]
-    ulift = [u10, u20, u30]
+    #q_lift_static = [q10, q20, q30]
+    #ulift = [u10, u20, u30]
 
     # Params
     dt = 0.2
@@ -72,7 +72,7 @@ function gen_prob(agent, quad_params, load_params, r0_load=[0,0,0.25];
 
     β = deg2rad(50)  # fan angle (radians)
     Nmid = convert(Int,floor(N/2))+1
-    r_cylinder = 0.5
+    r_cylinder = 0.01
     ceiling = 2.1
 
     # Constants
@@ -104,13 +104,14 @@ function gen_prob(agent, quad_params, load_params, r0_load=[0,0,0.25];
     xlift0, xload0 = get_states(r0_load, n_lift, n_load, num_lift, d, α)
     xliftf, xloadf = get_states(rf_load, n_lift, n_load, num_lift, d, α)
 
+    #=
     if num_lift == 3
         for i = 1:num_lift
             xlift0[i][4:7] = q_lift_static[i]
             xliftf[i][4:7] = q_lift_static[i]
         end
     end
-
+    =#
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ MIDPOINT ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # midpoint desired configuration
@@ -130,7 +131,7 @@ function gen_prob(agent, quad_params, load_params, r0_load=[0,0,0.25];
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ INITIAL CONTROLS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # Initial controls
-    if !(num_lift == 3 && scenario == :doorway)
+    if !(num_lift == 2 && scenario == :doorway)
         ulift, uload = calc_static_forces(α, quad_params.m, mass_load, num_lift)
     end
 
@@ -409,14 +410,19 @@ function gen_prob(agent, quad_params, load_params, r0_load=[0,0,0.25];
 
         con = Constraints(N)
         for k = 1:N-1
-            con[k] += dist_con + for_con + bnd + col_con
             if obs
-                con[k] += cyl
+                @debug "updating collision with cylinder constraint"
+                con[k] += dist_con + for_con + bnd + col_con + cyl
+            else
+                con[k] += dist_con + for_con + bnd + col_con
             end
         end
-        con[N] +=  col_con  + dist_con + bndN
+        #con[N] +=  col_con  + dist_con + bndN
         if obs
-            con[N] += cyl
+            @debug "updating collision with cylinder constraint"
+            con[N] +=  col_con  + dist_con + bndN + cyl
+        else
+            con[N] +=  col_con  + dist_con + bndN
         end
 
         # Create problem
@@ -424,6 +430,9 @@ function gen_prob(agent, quad_params, load_params, r0_load=[0,0,0.25];
                 dt=dt, N=N, xf=xf, x0=x0,
                 integration=:midpoint)
 
+        if obs
+            @assert length(prob.constraints[1]) > 4
+        end
         # Initial controls
         U0 = [u0 for k = 1:N-1]
         initial_controls!(prob, U0)
